@@ -9,7 +9,6 @@
     "angular-route": "^<%= ngVer %>"
   },
   "devDependencies": {
-    "angular-mocks": "~<%= ngVer %>",
-    "angular-scenario": "~<%= ngVer %>"
+    "angular-mocks": "~<%= ngVer %>"
   }
 }

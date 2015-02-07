@@ -2,6 +2,7 @@
 'use strict';
 
 var gulp = require('gulp');
+var karma = require('karma').server;
 var $ = require('gulp-load-plugins')();
 
 gulp.task('styles', function () {
@@ -93,17 +94,35 @@ gulp.task('serve', ['connect', 'watch'], function () {
   //require('opn')('http://localhost:9000');
 });
 
+gulp.task('test', function (done) {
+  karma.start({
+    configFile: __dirname + '/test/karma.conf.js',
+    singleRun: true
+  }, done);
+});
+
 // inject bower components
 gulp.task('wiredep', function () {
   var wiredep = require('wiredep').stream;
+  var exclude = [
+    'bootstrap',
+    'jquery',
+    'es5-shim',
+    'json3',
+    'angular-scenario'
+  ];
 
   gulp.src('app/styles/*.less')
     .pipe(wiredep())
     .pipe(gulp.dest('app/styles'));
 
   gulp.src('app/*.html')
-    .pipe(wiredep({exclude: ['bootstrap', 'jquery']}))
+    .pipe(wiredep({exclude: exclude}))
     .pipe(gulp.dest('app'));
+
+  gulp.src('test/*.js')
+    .pipe(wiredep({exclude: exclude, devDependencies: true}))
+    .pipe(gulp.dest('test'));
 });
 
 gulp.task('watch', ['connect'], function () {

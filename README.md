@@ -1,7 +1,7 @@
 slush-yangular
 ==============
 
-> A [slush](http://slushjs.github.io) generator for AngularJS using Bootstrap and Less.
+> A [slush](http://slushjs.github.io) generator for AngularJS using Bootstrap and Less based on the AngularJS generator for Yeoman.
 
 ## Installation
 
@@ -35,7 +35,7 @@ slush yangular
 
 #### Tasks
 
-To create additional script and files based on the angular generator for Yeoman:
+To generate additional scripts and files. *Based on the AngularJS generator for Yeoman*:
 
 ```bash
 slush yangular:view name
@@ -71,7 +71,7 @@ slush yangular:constant name
 
 ### Gulpfile
 
-The gulpfile is based on the gulp-webapp generator for Yeoman
+*The gulpfile is based on the gulp-webapp generator for Yeoman*
 
 #### Development
 
@@ -83,8 +83,16 @@ gulp serve
 
 Then head to `http://localhost:9000` in your browser.
 
-The `serve` tasks starts a static file server, which serves your AngularJS application, and a watch task which watches your files for changes and lints, builds and injects them into your index.html accordingly.
+The `serve` task starts a static file server, which serves your AngularJS application, and a watch task which watches your files for changes and lints, builds and injects them into your index.html accordingly.
 
+
+#### Testing
+
+To run Karma tests:
+
+```bash
+gulp test
+```
 
 #### Production ready build
 

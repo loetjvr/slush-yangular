@@ -39,36 +39,63 @@ function getAppName(callback) {
 }
 
 ///////////// TASKS //////////////////////
-gulp.task('default', function (done) {
-  inquirer.prompt([
-    {type: 'input', name: 'name', message: 'What do you want to name your AngularJS app?', default: getNameProposal()},
-  ],
-  function (answers) {
-    answers.slugAppName = _.slugify(answers.name);
-    answers.appName = _.camelize(answers.slugAppName);
+gulp.task('default', function () {
+  var name = getNameProposal();
+  var frameworks = ['Bootstrap LESS', 'Foundation SASS'];
 
-    var files = [__dirname + '/templates/**'];
+  if (gulp.args.length > 0) {
+    name = gulp.args[0];
+  }
+
+  // inquirer.prompt([
+  //   {
+  //     type: 'list',
+  //     name: 'framework',
+  //     message: 'What framework would you like to use',
+  //     choices: frameworks,
+  //   },
+  //   {
+  //     type: 'confirm',
+  //     name: 'awesome',
+  //     message: 'Would you like to include Font-Awesome?'
+  //   }
+  // ],
+  // function (answers) {
+
+  var answers = {};
+
+  answers.slugAppName = _.slugify(name);
+  answers.appName = _.camelize(answers.slugAppName);
+
+  var files = [__dirname + '/templates/**'];
     
-    return gulp.src(files)
-      .pipe(template(answers))
-      .pipe(rename(function (file) {
-        if (file.basename[0] === '_') {
-          file.basename = '.' + file.basename.slice(1);
-        }
-      }))
-      .pipe(conflict('./'))
-      .pipe(gulp.dest('./'))
-      .pipe(install())
-      .on('finish', function () {
-        done();
-      });
-  });
+    // if (answers.framework === frameworks[0]) {
+    //   files.push('!' + __dirname + '/templates/app/styles/main.scss');
+    // }
+    // else {
+    //   files.push('!' + __dirname + '/templates/app/styles/main.less');
+    // }
+
+  return gulp.src(files)
+    .pipe(template(answers))
+    .pipe(rename(function (file) {
+      if (file.basename[0] === '_') {
+        file.basename = '.' + file.basename.slice(1);
+      }
+    }))
+    .pipe(conflict('./'))
+    .pipe(gulp.dest('./'))
+    .pipe(install());
+    // .on('finish', function () {
+    //   done();
+    // });
+  //});
 });
 
 gulp.task('view', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/view.html'];
+  var file = [__dirname + '/task_templates/scripts/view.html'];
   
   var variables = {
     name: name
@@ -86,7 +113,7 @@ gulp.task('view', function () {
 gulp.task('controller', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/controller.js'];
+  var file = [__dirname + '/task_templates/scripts/controller.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -106,13 +133,24 @@ gulp.task('controller', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/controller.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/controllers'))
+      .pipe(gulp.dest('./test/spec/controllers'));
   });
 });
 
 gulp.task('route', ['view', 'controller'], function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/app.js'];
+  var file = [__dirname + '/task_templates/scripts/app.js'];
 
   var variables = {
     name: _.capitalize(name)
@@ -131,7 +169,7 @@ gulp.task('route', ['view', 'controller'], function () {
 gulp.task('directive', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/directive.js'];
+  var file = [__dirname + '/task_templates/scripts/directive.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -151,13 +189,24 @@ gulp.task('directive', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/directive.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/directives'))
+      .pipe(gulp.dest('./test/spec/directives'));
   });
 });
 
 gulp.task('filter', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/filter.js'];
+  var file = [__dirname + '/task_templates/scripts/filter.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -177,13 +226,24 @@ gulp.task('filter', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/filter.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/filters'))
+      .pipe(gulp.dest('./test/spec/filters'));
   });
 });
 
 gulp.task('service', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/service.js'];
+  var file = [__dirname + '/task_templates/scripts/service.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -203,13 +263,24 @@ gulp.task('service', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/service.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/services'))
+      .pipe(gulp.dest('./test/spec/services'));
   });
 });
 
 gulp.task('factory', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/factory.js'];
+  var file = [__dirname + '/task_templates/scripts/factory.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -229,13 +300,24 @@ gulp.task('factory', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/factory.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/services'))
+      .pipe(gulp.dest('./test/spec/services'));
   });
 });
 
 gulp.task('constant', function () {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/constant.js'];
+  var file = [__dirname + '/task_templates/scripts/constant.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -255,5 +337,16 @@ gulp.task('constant', function () {
           .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
           .pipe(gulp.dest('./app'));
       });
+
+    // create test
+    file = [__dirname + '/task_templates/tests/constant.js'];
+
+    gulp.src(file)
+      .pipe(template(variables))
+      .pipe(rename(function (file) {
+        file.basename = name.toLowerCase();
+      }))
+      .pipe(conflict('./test/spec/services'))
+      .pipe(gulp.dest('./test/spec/services'));
   });
 });
