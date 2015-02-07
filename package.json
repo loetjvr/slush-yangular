@@ -1,6 +1,6 @@
 {
   "name": "slush-yangular",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "AngularJS generator for Slush",
   "main": "slushfile.js",
   "scripts": {
