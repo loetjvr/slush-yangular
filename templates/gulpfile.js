@@ -5,7 +5,7 @@ var gulp = require('gulp');
 var karma = require('karma').server;
 var $ = require('gulp-load-plugins')();
 
-gulp.task('styles', function () {
+gulp.task('styles', function() {
   return gulp.src('app/styles/main.less')
     .pipe($.plumber())
     // .pipe($.rubySass({
@@ -17,24 +17,24 @@ gulp.task('styles', function () {
     .pipe(gulp.dest('.tmp/styles'));
 });
 
-gulp.task('jshint', function () {
+gulp.task('jshint', function() {
   return gulp.src('app/scripts/**/*.js')
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.jshint.reporter('fail'));
 });
 
-gulp.task('html', ['styles'], function () {
+gulp.task('html', ['styles'], function() {
   var lazypipe = require('lazypipe');
   var cssChannel = lazypipe()
     .pipe($.csso)
-    .pipe($.replace, 'bower_components/bootstrap/fonts','fonts');
-  
+    .pipe($.replace, 'bower_components/bootstrap/fonts', 'fonts');
+
   var assets = $.useref.assets({searchPath: '{.tmp,app}'});
 
   return gulp.src('app/**/*.html')
     .pipe(assets)
-    .pipe($.if('*.js', $.ngmin()))
+    .pipe($.if('*.js', $.ngAnnotate()))
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', cssChannel()))
     .pipe(assets.restore())
@@ -43,7 +43,7 @@ gulp.task('html', ['styles'], function () {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('images', function () {
+gulp.task('images', function() {
   return gulp.src('app/images/**/*')
     // .pipe($.cache($.imagemin({
     //   progressive: true,
@@ -52,14 +52,15 @@ gulp.task('images', function () {
     .pipe(gulp.dest('dist/images'));
 });
 
-gulp.task('fonts', function () {
-  return gulp.src(require('main-bower-files')().concat('app/fonts/**/*').concat('bower_components/bootstrap/fonts/*'))
+gulp.task('fonts', function() {
+  return gulp.src(require('main-bower-files')().concat('app/fonts/**/*')
+    .concat('bower_components/bootstrap/fonts/*'))
     .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest('dist/fonts'));
 });
 
-gulp.task('extras', function () {
+gulp.task('extras', function() {
   return gulp.src([
     'app/*.*',
     '!app/*.html',
@@ -71,7 +72,7 @@ gulp.task('extras', function () {
 
 gulp.task('clean', require('del').bind(null, ['.tmp', 'dist']));
 
-gulp.task('connect', ['styles'], function () {
+gulp.task('connect', ['styles'], function() {
   var serveStatic = require('serve-static');
   var serveIndex = require('serve-index');
   var app = require('connect')()
@@ -85,16 +86,16 @@ gulp.task('connect', ['styles'], function () {
 
   require('http').createServer(app)
     .listen(9000)
-    .on('listening', function () {
+    .on('listening', function() {
       console.log('Started connect web server on http://localhost:9000');
     });
 });
 
-gulp.task('serve', ['connect', 'watch'], function () {
+gulp.task('serve', ['connect', 'watch'], function() {
   //require('opn')('http://localhost:9000');
 });
 
-gulp.task('test', function (done) {
+gulp.task('test', function(done) {
   karma.start({
     configFile: __dirname + '/test/karma.conf.js',
     singleRun: true
@@ -102,7 +103,7 @@ gulp.task('test', function (done) {
 });
 
 // inject bower components
-gulp.task('wiredep', function () {
+gulp.task('wiredep', function() {
   var wiredep = require('wiredep').stream;
   var exclude = [
     'bootstrap',
@@ -125,7 +126,7 @@ gulp.task('wiredep', function () {
     .pipe(gulp.dest('test'));
 });
 
-gulp.task('watch', ['connect'], function () {
+gulp.task('watch', ['connect'], function() {
   $.livereload.listen();
 
   // watch for changes
@@ -140,10 +141,11 @@ gulp.task('watch', ['connect'], function () {
   gulp.watch('bower.json', ['wiredep']);
 });
 
-gulp.task('builddist', ['jshint', 'html', 'images', 'fonts', 'extras'], function () {
+gulp.task('builddist', ['jshint', 'html', 'images', 'fonts', 'extras'],
+  function() {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
-gulp.task('build', ['clean'], function () {
+gulp.task('build', ['clean'], function() {
   gulp.start('builddist');
 });

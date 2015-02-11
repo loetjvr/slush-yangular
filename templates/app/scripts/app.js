@@ -2,7 +2,7 @@
 
 angular
   .module('<%= appName %>', [
-    'ngRoute',
+    'ngRoute'
   ])
   .config(function ($routeProvider) {
     $routeProvider
