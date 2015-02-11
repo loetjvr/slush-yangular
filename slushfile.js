@@ -11,7 +11,7 @@ var data = require('gulp-data');
 //////////// FUNCTIONS ///////////////////
 function getNameProposal() {
   var path = require('path');
-  
+
   try {
     return require(path.join(process.cwd(), 'package.json')).name;
   } catch (e) {
@@ -20,10 +20,9 @@ function getNameProposal() {
 }
 
 function getArgs() {
-  if (gulp.args.length > 0) {
+  if (gulp.args && gulp.args.length === 1) {
     return gulp.args[0];
-  }
-  else {
+  } else {
     console.log('Please provide name');
     process.exit();
   }
@@ -38,12 +37,49 @@ function getAppName(callback) {
     }));
 }
 
+function injectScriptPath(done) {
+  gulp.src('./app/index.html')
+    .pipe(inject(gulp.src('./app/scripts/**/*.js'), {
+      starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->',
+      endtag: '<!-- endbuild -->',
+      relative: true
+    }))
+    .pipe(gulp.dest('./app'))
+    .on('finish', function() {
+      if (done !== undefined) {
+        done();
+      }
+    })
+}
+
+function genTestFile(type, variables, done) {
+  var file = [__dirname + '/task_templates/tests/' + type + '.js'];
+
+  gulp.src(file)
+    .pipe(template(variables))
+    .pipe(rename(function(file) {
+      file.basename = variables.name.toLowerCase();
+    }))
+    .pipe(conflict('./test/spec/' + type + 's'))
+    .pipe(gulp.dest('./test/spec/' + type + 's'))
+    .on('finish', function() {
+      if (done !== undefined) {
+        done();
+      }
+    });
+}
+
+///////////// EXPORT ////////////////////
+module.exports = {
+  _genTestFile: genTestFile
+}
+
 ///////////// TASKS //////////////////////
-gulp.task('default', function () {
+gulp.task('default', function(done) {
   var name = getNameProposal();
   var frameworks = ['Bootstrap LESS', 'Foundation SASS'];
 
-  if (gulp.args.length > 0) {
+  if (gulp.args > 0 && gulp.args.length === 1) {
     name = gulp.args[0];
   }
 
@@ -60,7 +96,7 @@ gulp.task('default', function () {
   //     message: 'Would you like to include Font-Awesome?'
   //   }
   // ],
-  // function (answers) {
+  // function(answers) {
 
   var answers = {};
 
@@ -68,7 +104,6 @@ gulp.task('default', function () {
   answers.appName = _.camelize(answers.slugAppName);
 
   var files = [__dirname + '/templates/**'];
-    
     // if (answers.framework === frameworks[0]) {
     //   files.push('!' + __dirname + '/templates/app/styles/main.scss');
     // }
@@ -76,41 +111,44 @@ gulp.task('default', function () {
     //   files.push('!' + __dirname + '/templates/app/styles/main.less');
     // }
 
-  return gulp.src(files)
+  gulp.src(files)
     .pipe(template(answers))
-    .pipe(rename(function (file) {
+    .pipe(rename(function(file) {
       if (file.basename[0] === '_') {
         file.basename = '.' + file.basename.slice(1);
       }
     }))
     .pipe(conflict('./'))
     .pipe(gulp.dest('./'))
-    .pipe(install());
-    // .on('finish', function () {
-    //   done();
-    // });
+    .pipe(install())
+    .on('finish', function() {
+      done();
+    });
   //});
 });
 
-gulp.task('view', function () {
+gulp.task('view', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/view.html'];
-  
+
   var variables = {
     name: name
   };
 
   gulp.src(file)
     .pipe(template(variables))
-    .pipe(rename(function (file) {
+    .pipe(rename(function(file) {
       file.basename = name.toLowerCase();
     }))
     .pipe(conflict('./'))
-    .pipe(gulp.dest('./app/views'));
+    .pipe(gulp.dest('./app/views'))
+    .on('finish', function() {
+      done();
+    });
 });
 
-gulp.task('controller', function () {
+gulp.task('controller', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/controller.js'];
@@ -123,31 +161,21 @@ gulp.task('controller', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/controllers'))
       .pipe(gulp.dest('./app/scripts/controllers'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('controller', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/controller.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/controllers'))
-      .pipe(gulp.dest('./test/spec/controllers'));
   });
 });
 
-gulp.task('route', ['view', 'controller'], function () {
+gulp.task('route', ['view', 'controller'], function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/app.js'];
@@ -160,13 +188,18 @@ gulp.task('route', ['view', 'controller'], function () {
     .pipe(template(variables));
 
   gulp.src('./app/scripts/app.js')
-    .pipe(inject(appFile, {starttag: '})', endtag: '.otherwise({', transform: function (filePath, file) {
-      return file.contents.toString('utf8');
-    }}))
-    .pipe(gulp.dest('./app/scripts'));
+    .pipe(inject(appFile, {starttag: '})', endtag: '.otherwise({',
+      transform: function(filePath, file) {
+        return file.contents.toString('utf8');
+      }
+    }))
+    .pipe(gulp.dest('./app/scripts'))
+    .on('finish', function() {
+      done();
+    });
 });
 
-gulp.task('directive', function () {
+gulp.task('directive', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/directive.js'];
@@ -179,31 +212,21 @@ gulp.task('directive', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/directives'))
       .pipe(gulp.dest('./app/scripts/directives'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('directive', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/directive.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/directives'))
-      .pipe(gulp.dest('./test/spec/directives'));
   });
 });
 
-gulp.task('filter', function () {
+gulp.task('filter', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/filter.js'];
@@ -216,31 +239,21 @@ gulp.task('filter', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/filters'))
       .pipe(gulp.dest('./app/scripts/filters'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('filter', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/filter.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/filters'))
-      .pipe(gulp.dest('./test/spec/filters'));
   });
 });
 
-gulp.task('service', function () {
+gulp.task('service', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/service.js'];
@@ -253,31 +266,21 @@ gulp.task('service', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/services'))
       .pipe(gulp.dest('./app/scripts/services'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('service', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/service.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/services'))
-      .pipe(gulp.dest('./test/spec/services'));
   });
 });
 
-gulp.task('factory', function () {
+gulp.task('factory', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/factory.js'];
@@ -290,31 +293,21 @@ gulp.task('factory', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/services'))
       .pipe(gulp.dest('./app/scripts/services'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('service', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/factory.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/services'))
-      .pipe(gulp.dest('./test/spec/services'));
   });
 });
 
-gulp.task('constant', function () {
+gulp.task('constant', function(done) {
   var name = getArgs();
 
   var file = [__dirname + '/task_templates/scripts/constant.js'];
@@ -327,26 +320,16 @@ gulp.task('constant', function () {
 
     gulp.src(file)
       .pipe(template(variables))
-      .pipe(rename(function (file) {
+      .pipe(rename(function(file) {
         file.basename = name.toLowerCase();
       }))
       .pipe(conflict('./app/scripts/services'))
       .pipe(gulp.dest('./app/scripts/services'))
       .on('finish', function() {
-        gulp.src('./app/index.html')
-          .pipe(inject(gulp.src('./app/scripts/**/*.js'), {starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->', endtag: '<!-- endbuild -->', relative: true}))
-          .pipe(gulp.dest('./app'));
+        done();
+
+        injectScriptPath();
+        genTestFile('service', variables);
       });
-
-    // create test
-    file = [__dirname + '/task_templates/tests/constant.js'];
-
-    gulp.src(file)
-      .pipe(template(variables))
-      .pipe(rename(function (file) {
-        file.basename = name.toLowerCase();
-      }))
-      .pipe(conflict('./test/spec/services'))
-      .pipe(gulp.dest('./test/spec/services'));
   });
 });
