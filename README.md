@@ -1,4 +1,4 @@
-slush-yangular
+slush-yangular [![Build Status](https://travis-ci.org/loetjvr/slush-yangular.svg?branch=master)](https://travis-ci.org/loetjvr/slush-yangular) [![Dependency Status](https://david-dm.org/loetjvr/slush-yangular.svg)](https://david-dm.org/loetjvr/slush-yangular.svg)
 ==============
 
 > A [slush](http://slushjs.github.io) generator for AngularJS using Bootstrap and Less based on the AngularJS generator for Yeoman.
