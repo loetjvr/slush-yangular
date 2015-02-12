@@ -26,11 +26,11 @@ mkdir my-angular-app
 ```
 
 Run the generator from within the new folder:
+*Note name is optional*
 
 ```bash
 cd my-angular-app
-
-slush yangular
+slush yangular name
 ```
 
 #### Tasks

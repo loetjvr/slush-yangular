@@ -53,7 +53,7 @@ function injectScriptPath(done) {
 }
 
 function genTestFile(type, variables, done) {
-  var file = [__dirname + '/task_templates/tests/' + type + '.js'];
+  var file = [__dirname + '/tasktemplates/test/_' + type + '.js'];
 
   gulp.src(file)
     .pipe(template(variables))
@@ -130,7 +130,7 @@ gulp.task('default', function(done) {
 gulp.task('view', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/view.html'];
+  var file = [__dirname + '/tasktemplates/app/_view.html'];
 
   var variables = {
     name: name
@@ -151,7 +151,7 @@ gulp.task('view', function(done) {
 gulp.task('controller', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/controller.js'];
+  var file = [__dirname + '/tasktemplates/app/_controller.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -178,7 +178,7 @@ gulp.task('controller', function(done) {
 gulp.task('route', ['view', 'controller'], function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/app.js'];
+  var file = [__dirname + '/tasktemplates/app/_app.js'];
 
   var variables = {
     name: _.capitalize(name)
@@ -202,7 +202,7 @@ gulp.task('route', ['view', 'controller'], function(done) {
 gulp.task('directive', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/directive.js'];
+  var file = [__dirname + '/tasktemplates/app/_directive.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -229,7 +229,7 @@ gulp.task('directive', function(done) {
 gulp.task('filter', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/filter.js'];
+  var file = [__dirname + '/tasktemplates/app/_filter.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -256,7 +256,7 @@ gulp.task('filter', function(done) {
 gulp.task('service', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/service.js'];
+  var file = [__dirname + '/tasktemplates/app/_service.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -283,7 +283,7 @@ gulp.task('service', function(done) {
 gulp.task('factory', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/factory.js'];
+  var file = [__dirname + '/tasktemplates/app/_factory.js'];
 
   getAppName(function(appName) {
     var variables = {
@@ -310,7 +310,7 @@ gulp.task('factory', function(done) {
 gulp.task('constant', function(done) {
   var name = getArgs();
 
-  var file = [__dirname + '/task_templates/scripts/constant.js'];
+  var file = [__dirname + '/tasktemplates/app/_constant.js'];
 
   getAppName(function(appName) {
     var variables = {

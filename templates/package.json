@@ -3,8 +3,12 @@
   "engines": {
     "node": ">=0.10.0"
   },
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha test/gulp/test.js && gulp test"
+  },
   "devDependencies": {
     "apache-server-configs": "^2.7.1",
+    "chai": "^2.0.0",
     "connect": "^3.0.1",
     "connect-livereload": "^0.5.0",
     "del": "^0.1.0",
@@ -22,6 +26,7 @@
     "gulp-minify-html": "^0.1.6",
     "gulp-ng-annotate": "^0.5.2",
     "gulp-plumber": "^0.6.3",
+    "gulp-rename": "^1.2.0",
     "gulp-replace": "^0.4.0",
     "gulp-size": "^1.1.0",
     "gulp-uglify": "^1.0.1",
@@ -32,6 +37,8 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "lazypipe": "^0.2.1",
     "main-bower-files": "^2.1.0",
+    "mocha": "^2.1.0",
+    "mock-gulp-dest": "^0.1.1",
     "opn": "^1.0.0",
     "serve-index": "^1.1.4",
     "serve-static": "^1.4.0",

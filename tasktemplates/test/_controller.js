@@ -1,22 +1,22 @@
 'use strict';
 
-describe('Controller: <%= name %>Ctrl', function () {
+describe('Controller: <%= name %>Ctrl', function() {
 
   // load the controller's module
   beforeEach(module('<%= appName %>'));
 
-  var <%= name %>Ctrl,
-    scope;
+  var <%= name %>Ctrl;
+  var scope;
 
   // Initialize the controller and a mock scope
-  beforeEach(inject(function ($controller, $rootScope) {
+  beforeEach(inject(function($controller, $rootScope) {
     scope = $rootScope.$new();
     <%= name %>Ctrl = $controller('<%= name %>Ctrl', {
       $scope: scope
     });
   }));
 
-  it('should attach test', function () {
-    expect(false).toBe(true);
+  it('should set name to <%= name %>Ctrl', function() {
+    expect(scope.name).toBe('<%= name %>Ctrl');
   });
 });

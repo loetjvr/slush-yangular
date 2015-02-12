@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('<%= appName %>')
-  .controller('MainCtrl', function ($scope) {
+  .controller('MainCtrl', function($scope) {
     $scope.tasks = [
       'view',
       'controller',
