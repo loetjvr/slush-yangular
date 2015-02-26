@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @ngdoc service
+ * @name <%= appName %>.<%= name %>
+ * @description
+ * # <%= name %>
+ * Factory in <%= appName %>.
+ */
 angular.module('<%= appName %>')
   .factory('<%= name %>', function() {
     // Service logic

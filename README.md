@@ -76,9 +76,10 @@ slush yangular:constant name
 #### Development
 
 To start developing in your new generated project run:
+*Note --open is optional. This argument opens the browser*
 
 ```bash
-gulp serve
+gulp serve --open
 ```
 
 Then head to `http://localhost:9000` in your browser.
@@ -103,3 +104,13 @@ gulp build
 ```
 
 Now you have a `./dist` folder with all your scripts and stylesheets concatenated and minified, also third party libraries installed with bower will be concatenated and minified into `vendors.min.js` and `vendors.min.css` respectively.
+
+#### Documentation
+
+To generate [ngDocs](https://github.com/angular/angular.js/wiki/Writing-AngularJS-Documentation):
+
+```bash
+gulp docs
+```
+
+Now you have a `./docs` folder with all the generated documentation in a format that can be hosted.

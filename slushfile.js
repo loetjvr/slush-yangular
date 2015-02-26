@@ -1,9 +1,12 @@
+'use strict';
+
 var gulp = require('gulp');
 var install = require('gulp-install');
 var conflict = require('gulp-conflict');
 var template = require('gulp-template');
-var inject = require('gulp-inject');
-var inquirer = require('inquirer');
+var gInject = require('gulp-inject');
+var replace = require('gulp-replace');
+//var inquirer = require('inquirer');
 var _ = require('underscore.string');
 var rename = require('gulp-rename');
 var data = require('gulp-data');
@@ -39,7 +42,7 @@ function getAppName(callback) {
 
 function injectScriptPath(done) {
   gulp.src('./app/index.html')
-    .pipe(inject(gulp.src('./app/scripts/**/*.js'), {
+    .pipe(gInject(gulp.src('./app/scripts/**/*.js'), {
       starttag: '<!-- build:js({.tmp,app}) scripts/scripts.js -->',
       endtag: '<!-- endbuild -->',
       relative: true
@@ -49,7 +52,7 @@ function injectScriptPath(done) {
       if (done !== undefined) {
         done();
       }
-    })
+    });
 }
 
 function genTestFile(type, variables, done) {
@@ -72,12 +75,12 @@ function genTestFile(type, variables, done) {
 ///////////// EXPORT ////////////////////
 module.exports = {
   _genTestFile: genTestFile
-}
+};
 
 ///////////// TASKS //////////////////////
 gulp.task('default', function(done) {
   var name = getNameProposal();
-  var frameworks = ['Bootstrap LESS', 'Foundation SASS'];
+  //var frameworks = ['Bootstrap LESS', 'Foundation SASS'];
 
   if (gulp.args > 0 && gulp.args.length === 1) {
     name = gulp.args[0];
@@ -156,7 +159,7 @@ gulp.task('controller', function(done) {
   getAppName(function(appName) {
     var variables = {
       appName: appName,
-      name: _.capitalize(name)
+      name: _.capitalize(_.camelize(name))
     };
 
     gulp.src(file)
@@ -176,27 +179,19 @@ gulp.task('controller', function(done) {
 });
 
 gulp.task('route', ['view', 'controller'], function(done) {
-  var name = getArgs();
+  var name = _.capitalize(getArgs());
 
-  var file = [__dirname + '/tasktemplates/app/_app.js'];
-
-  var variables = {
-    name: _.capitalize(name)
-  };
-
-  var appFile = gulp.src(file)
-    .pipe(template(variables));
+  var script = '.when(\'/' + name.toLowerCase() +
+    '\', {\n        templateUrl: \'views/' +
+    name.toLowerCase() + '.html\',\n        controller: \'' +
+    _.camelize(name) + 'Ctrl\'\n      })\n      .otherwise({';
 
   gulp.src('./app/scripts/app.js')
-    .pipe(inject(appFile, {starttag: '})', endtag: '.otherwise({',
-      transform: function(filePath, file) {
-        return file.contents.toString('utf8');
-      }
-    }))
-    .pipe(gulp.dest('./app/scripts'))
-    .on('finish', function() {
-      done();
-    });
+  .pipe(replace(/.otherwise\(\{/g, script))
+  .pipe(gulp.dest('./app/scripts'))
+  .on('finish', function() {
+    done();
+  });
 });
 
 gulp.task('directive', function(done) {
@@ -207,7 +202,7 @@ gulp.task('directive', function(done) {
   getAppName(function(appName) {
     var variables = {
       appName: appName,
-      name: name
+      name: _.camelize(name)
     };
 
     gulp.src(file)

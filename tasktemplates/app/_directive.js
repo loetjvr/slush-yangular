@@ -1,7 +1,13 @@
 'use strict';
 
+/**
+ * @ngdoc directive
+ * @name <%= appName %>.directive:<%= name %>
+ * @description
+ * # <%= name %>
+ */
 angular.module('<%= appName %>')
-  .<%= name %>('<%= name %>', function() {
+  .directive('<%= name %>', function() {
     return {
       template: '<div></div>',
       restrict: 'E',

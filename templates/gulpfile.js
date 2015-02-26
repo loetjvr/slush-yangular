@@ -3,6 +3,7 @@
 
 var gulp = require('gulp');
 var karma = require('karma').server;
+var argv = require('yargs').argv;
 var $ = require('gulp-load-plugins')();
 
 gulp.task('styles', function() {
@@ -92,7 +93,9 @@ gulp.task('connect', ['styles'], function() {
 });
 
 gulp.task('serve', ['wiredep', 'connect', 'watch'], function() {
-  //require('opn')('http://localhost:9000');
+  if (argv.open) {
+    require('opn')('http://localhost:9000');
+  }
 });
 
 gulp.task('test', function(done) {
@@ -148,4 +151,10 @@ gulp.task('builddist', ['jshint', 'html', 'images', 'fonts', 'extras'],
 
 gulp.task('build', ['clean'], function() {
   gulp.start('builddist');
+});
+
+gulp.task('docs', [], function() {
+  return gulp.src('app/scripts/**/**')
+    .pipe($.ngdocs.process())
+    .pipe(gulp.dest('./docs'));
 });
