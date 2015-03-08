@@ -1,3 +1,6 @@
+# DEPRECATED!
+> use [generator-yangular](https://github.com/loetjvr/generator-yangular)
+
 slush-yangular [![Build Status](https://travis-ci.org/loetjvr/slush-yangular.svg?branch=master)](https://travis-ci.org/loetjvr/slush-yangular) [![Dependency Status](https://david-dm.org/loetjvr/slush-yangular.svg)](https://david-dm.org/loetjvr/slush-yangular.svg)
 ==============
 
